@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>3D-Druck Konfigurator</title>
+    <link rel="stylesheet" href="./src/style.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span class="brand-name" data-company-name>XL Print Studio</span>
+      </div>
+      <p class="topbar-note">Großformat-3D-Druck bis 1 × 1 × 1 m – Preis sofort berechnen</p>
+    </header>
+
+    <main class="app">
+      <!-- 3D-Ansicht -->
+      <section class="stage" id="stage">
+        <div class="viewer" id="viewer"></div>
+
+        <div class="stage-info">
+          <div class="model-name" id="model-name">–</div>
+          <div class="model-dims" id="model-dims"></div>
+        </div>
+
+        <div class="stage-tools">
+          <button type="button" class="tool" id="btn-fit" title="Ansicht zurücksetzen">Ansicht</button>
+          <button type="button" class="tool" id="btn-wire" aria-pressed="false" title="Drahtgitter">Drahtgitter</button>
+          <button type="button" class="tool" id="btn-box" aria-pressed="false" title="Begrenzungsrahmen">Rahmen</button>
+        </div>
+
+        <div class="stage-grid" id="grid-label"></div>
+        <a class="stage-price" href="#price-card"><span>Gesamt</span><strong id="stage-price">–</strong></a>
+
+        <div class="stage-drop" id="stage-drop">Datei hier ablegen</div>
+        <div class="stage-loading" id="stage-loading" hidden>
+          <span class="spinner"></span><span>Modell wird geladen…</span>
+        </div>
+      </section>
+
+      <!-- Konfiguration -->
+      <aside class="panel">
+        <section class="step">
+          <h2><span class="step-no">1</span>Modell</h2>
+          <label class="dropzone" id="dropzone">
+            <input type="file" id="file-input" accept=".stl,.obj,.3mf" hidden />
+            <strong>Eigene Datei hochladen</strong>
+            <span>STL, OBJ oder 3MF · hierher ziehen oder klicken</span>
+          </label>
+          <p class="error" id="upload-error" hidden></p>
+          <p class="hint">Oder ein Modell aus unserem Sortiment wählen:</p>
+          <div class="presets" id="presets"></div>
+        </section>
+
+        <section class="step">
+          <h2><span class="step-no">2</span>Material</h2>
+          <div class="materials" id="materials"></div>
+          <div class="colors">
+            <span class="label">Farbe: <strong id="color-name"></strong></span>
+            <div class="swatches" id="swatches"></div>
+          </div>
+        </section>
+
+        <section class="step">
+          <h2><span class="step-no">3</span>Größe</h2>
+          <div class="row">
+            <label class="field">
+              <span>Einheit der Datei</span>
+              <select id="unit">
+                <option value="1">Millimeter</option>
+                <option value="10">Zentimeter</option>
+                <option value="25.4">Zoll</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Skalierung</span>
+              <div class="input-suffix">
+                <input type="number" id="scale-number" min="1" max="100000" step="1" />
+                <em>%</em>
+              </div>
+            </label>
+          </div>
+          <input type="range" id="scale-range" min="0" max="1000" step="1" aria-label="Skalierung" />
+          <div class="dims">
+            <label class="field"><span>Breite</span><div class="input-suffix"><input type="number" data-dim="0" min="1" step="1" /><em>mm</em></div></label>
+            <label class="field"><span>Tiefe</span><div class="input-suffix"><input type="number" data-dim="1" min="1" step="1" /><em>mm</em></div></label>
+            <label class="field"><span>Höhe</span><div class="input-suffix"><input type="number" data-dim="2" min="1" step="1" /><em>mm</em></div></label>
+          </div>
+          <div class="row row-actions">
+            <button type="button" class="link" id="btn-reset-scale">100 %</button>
+            <button type="button" class="link" id="btn-max-scale">Maximale Größe</button>
+          </div>
+          <p class="warning" id="size-warning" hidden></p>
+        </section>
+
+        <section class="step">
+          <h2><span class="step-no">4</span>Optionen</h2>
+          <div class="option-group">
+            <span class="label">Füllgrad</span>
+            <div class="segmented" id="infill"></div>
+            <p class="hint" id="infill-hint" hidden>Dieses Material wird immer massiv gedruckt.</p>
+          </div>
+          <div class="option-group">
+            <span class="label">Qualität</span>
+            <div class="segmented" id="quality"></div>
+          </div>
+          <div class="option-group">
+            <span class="label">Oberfläche</span>
+            <div class="segmented" id="finishing"></div>
+          </div>
+          <div class="row">
+            <label class="check">
+              <input type="checkbox" id="supports" checked />
+              <span>Stützstrukturen einplanen</span>
+            </label>
+            <div class="stepper">
+              <button type="button" id="qty-minus" aria-label="Weniger">−</button>
+              <input type="number" id="qty" min="1" max="999" value="1" aria-label="Stückzahl" />
+              <button type="button" id="qty-plus" aria-label="Mehr">+</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="price-card" id="price-card">
+          <div class="price-head">
+            <span>Gesamtpreis inkl. MwSt.</span>
+            <strong class="price-total" id="price-total">–</strong>
+            <span class="price-net" id="price-net"></span>
+          </div>
+          <dl class="facts" id="facts"></dl>
+          <details class="breakdown">
+            <summary>Preisaufschlüsselung</summary>
+            <dl id="breakdown"></dl>
+          </details>
+          <button type="button" class="primary" id="btn-order">Angebot anfragen</button>
+          <p class="fineprint">Unverbindliche Schätzung. Der finale Preis wird nach Prüfung der Datei bestätigt.</p>
+        </section>
+      </aside>
+    </main>
+
+    <dialog class="order-dialog" id="order-dialog">
+      <form method="dialog" id="order-form">
+        <h3>Angebot anfragen</h3>
+        <pre class="summary" id="order-summary"></pre>
+        <label class="field"><span>Name</span><input name="name" required autocomplete="name" /></label>
+        <label class="field"><span>E-Mail</span><input name="email" type="email" required autocomplete="email" /></label>
+        <label class="field"><span>Nachricht (optional)</span><textarea name="message" rows="3"></textarea></label>
+        <p class="hint" id="order-file-hint"></p>
+        <div class="dialog-actions">
+          <button type="button" class="link" id="btn-copy">Zusammenfassung kopieren</button>
+          <button value="cancel" formnovalidate class="secondary">Abbrechen</button>
+          <button value="send" class="primary">E-Mail öffnen</button>
+        </div>
+      </form>
+    </dialog>
+
+    <script type="module" src="./src/main.js"></script>
+  </body>
+</html>
